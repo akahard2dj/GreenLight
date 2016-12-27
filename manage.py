@@ -1,0 +1,27 @@
+from app import create_app, db
+from app.models.user import User
+from app.models.post import Post
+from app.models.role import Role
+from app.models.comment import Comment
+from flask_script import Manager, Shell, Server
+from flask_migrate import Migrate, MigrateCommand
+from OpenSSL import SSL
+
+app = create_app('default')
+manager = Manager(app)
+migrate = Migrate(app, db)
+
+
+def make_shell_context():
+    return dict(app=app, db=db, User=User, Role=Role, Post=Post, Comment=Comment)
+
+#ssl_ctx = SSL.Context(SSL.SSLv23_METHOD)
+#ssl_ctx.use_privatekey('greenlight.key')
+#ssl_ctx.use_certificate('greenlight.crt')
+
+manager.add_command("shell", Shell(make_context=make_shell_context))
+manager.add_command("db", MigrateCommand)
+manager.add_command("runserver", Server(ssl_context=('greenlight.crt', 'greenlight.key')))
+
+if __name__ == '__main__':
+    manager.run()
