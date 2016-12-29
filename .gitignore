@@ -96,3 +96,7 @@ ENV/
 priv_key.pem
 pub_key.pem
 test.py
+greenlight.crt
+greenlight.csr
+greenlight.key
+greenlight.key.origin

@@ -1,6 +1,7 @@
 from flask import g, jsonify
 from flask_httpauth import HTTPBasicAuth
 from ..models.user import User
+from ..models.anonymoususer import AnonymousUser
 from . import api
 from .errors import unauthorized, forbidden
 from ..models import token_authentication
@@ -40,9 +41,10 @@ def verify_password(email_or_token, password):
         return g.current_user is not None
 
     # other case
-    # all connection is refused
+    # all connection is anonymous user
     else:
-        return False
+        g.current_user = AnonymousUser()
+        return True
 
 #todo http auth ip reject
 
@@ -56,13 +58,13 @@ def auth_error():
 @auth.login_required
 def before_request():
     # todo confirmed is email auth.
-    if not g.current_user.confirmed:
+    if not g.current_user.is_anonymous and not g.current_user.confirmed:
         return forbidden('Unconfirmed account')
 
 
 @api.route('/token')
 def get_token():
-    if g.token_used:
+    if g.current_user.is_anonymous or g.token_used:
         return unauthorized('Invalid credentials')
     timed_key = token_authentication.generate_auth_token(g.current_user, expiration=3600)
     return jsonify({'token': timed_key, 'expiration': 3600})

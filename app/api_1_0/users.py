@@ -15,78 +15,6 @@ auth = HTTPBasicAuth()
 rsa_cipher = RSACipher(os.path.join(os.getcwd(), 'greenlight.key'))
 
 
-@api.route('/users/test', methods=['GET'])
-def test_user():
-    return jsonify({'result': 'success'})
-
-
-@api.route('/users')
-def get_user():
-    try:
-        token_flag = g.token_used
-    except AttributeError:
-        return forbidden('Unconfirmed account')
-    else:
-        if token_flag:
-            user = g.current_user
-            return jsonify(user.to_json())
-        else:
-            return unauthorized('Invalid credentials')
-
-
-@auth.login_required
-@api.route('/users/login_test', methods=['GET'])
-def user_login_test():
-    return jsonify({'message':'ok'})
-
-
-@auth.login_required
-@api.route('/users/reset_username', methods=['GET', 'POST'])
-def reset_username():
-    data = request.json['data']
-
-    try:
-        token_data = rsa_cipher.decrypt(data)
-    except cryptography.exceptions.InvalidKey:
-        return unauthorized('invalid public key')
-
-    username = token_data
-    user_query = User.query.filter_by(username=username).first()
-    if user_query is not None:
-        return not_acceptable('username already exists')
-    else:
-        user = User.query.filter_by(id=g.current_user.id).first()
-        user.reset_username(username)
-
-    response = jsonify({'message': 'success'})
-    response.status_code = 200
-
-    return response
-
-
-@auth.login_required
-@api.route('/users/reset_password', methods=['GET', 'POST'])
-def reset_password():
-    data = request.json['data']
-
-    try:
-        token_data = rsa_cipher.decrypt(data)
-    except cryptography.exceptions.InvalidKey:
-        return unauthorized('invalid public key')
-
-    password = token_data
-    user = User.query.filter_by(id=g.current_user.id).first()
-
-    is_success = user.reset_password(password)
-    if is_success:
-        response = jsonify({'message': 'success'})
-        response.status_code = 200
-
-        return response
-    else:
-        return bad_request('db is not corresponding')
-
-
 @api.route('/users/add', methods=['GET', 'POST'])
 def add_user():
     data = request.json['data']
@@ -114,3 +42,75 @@ def add_user():
         response.status_code = 200
 
         return response
+
+
+@api.route('/users/test', methods=['GET'])
+def test_user():
+    return jsonify({'result': 'success'})
+
+
+@api.route('/users')
+def get_user():
+    try:
+        token_flag = g.token_used
+    except AttributeError:
+        return forbidden('Unconfirmed account')
+    else:
+        if token_flag:
+            user = g.current_user
+            return jsonify(user.to_json())
+        else:
+            return unauthorized('Invalid credentials')
+
+
+@api.route('/users/login_test', methods=['GET'])
+@auth.login_required
+def user_login_test():
+    return jsonify({'message':'ok'})
+
+
+@api.route('/users/reset_username', methods=['GET', 'POST'])
+@auth.login_required
+def reset_username():
+    data = request.json['data']
+
+    try:
+        token_data = rsa_cipher.decrypt(data)
+    except cryptography.exceptions.InvalidKey:
+        return unauthorized('invalid public key')
+
+    username = token_data
+    user_query = User.query.filter_by(username=username).first()
+    if user_query is not None:
+        return not_acceptable('username already exists')
+    else:
+        user = User.query.filter_by(id=g.current_user.id).first()
+        user.reset_username(username)
+
+    response = jsonify({'message': 'success'})
+    response.status_code = 200
+
+    return response
+
+
+@api.route('/users/reset_password', methods=['GET', 'POST'])
+@auth.login_required
+def reset_password():
+    data = request.json['data']
+
+    try:
+        token_data = rsa_cipher.decrypt(data)
+    except cryptography.exceptions.InvalidKey:
+        return unauthorized('invalid public key')
+
+    password = token_data
+    user = User.query.filter_by(id=g.current_user.id).first()
+
+    is_success = user.reset_password(password)
+    if is_success:
+        response = jsonify({'message': 'success'})
+        response.status_code = 200
+
+        return response
+    else:
+        return bad_request('db is not corresponding')

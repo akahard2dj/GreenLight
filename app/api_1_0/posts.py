@@ -20,8 +20,8 @@ def post_view(id):
     return jsonify({'message': 'ok'})
 
 
-@auth.login_required
 @api.route('/posts/pagination', methods=['GET'])
+@auth.login_required
 def post_pagination():
     per_page = current_app.config['FLASKY_POSTS_PER_PAGE']
     page = request.args.get('page', 1, type=int)
@@ -47,8 +47,8 @@ def post_pagination():
     return jsonify({'message': 'ok', 'next_item': next_item})
 
 
-@auth.login_required
 @api.route('/posts/')
+@auth.login_required
 def get_posts():
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.id.desc()).paginate(
