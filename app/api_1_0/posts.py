@@ -5,14 +5,17 @@ from flask_httpauth import HTTPBasicAuth
 from . import api
 from .errors import unauthorized, forbidden, not_acceptable, bad_request
 from ..models.post import Post
+from ..models.comment import Comment
 from .. import db
 
 auth = HTTPBasicAuth()
 
 
-@api.route('/posts/view/<int:id>', methods=['GET'])
-def post_view(id):
-    post = Post.query.get_or_404(id)
+@auth.login_required
+@api.route('/posts/view/<int:post_id>', methods=['GET'])
+def get_post(post_id):
+    print('called')
+    post = Post.query.get_or_404(post_id)
     post.increase_read_count(post.read_counts+1)
     print(post.read_counts)
     print(post.author_id, post.title, post.body, post.timestamp)
@@ -20,8 +23,27 @@ def post_view(id):
     return jsonify({'message': 'ok'})
 
 
-@api.route('/posts/pagination', methods=['GET'])
+# todo comment loading jsonify needs to be implemented
 @auth.login_required
+@api.route('/posts/view/<int:post_id>/comments/', methods=['GET'])
+def get_post_comments(post_id):
+    post = Post.query.get_or_404(post_id)
+    comments = post.comments.order_by(Comment.timestamp.asc())
+    for comment in comments:
+        print(comment.post_id, comment.body, comment.timestamp)
+
+    return jsonify({'message': 'ok'})
+
+
+# todo comment posting
+@auth.login_required
+@api.route('/posts/view/<int:post_id>/comments/', methods=['POST'])
+def set_post_comments(post_id):
+    pass
+
+
+@auth.login_required
+@api.route('/posts/pagination', methods=['GET'])
 def post_pagination():
     per_page = current_app.config['FLASKY_POSTS_PER_PAGE']
     page = request.args.get('page', 1, type=int)
@@ -47,8 +69,8 @@ def post_pagination():
     return jsonify({'message': 'ok', 'next_item': next_item})
 
 
-@api.route('/posts/')
 @auth.login_required
+@api.route('/posts/')
 def get_posts():
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.id.desc()).paginate(

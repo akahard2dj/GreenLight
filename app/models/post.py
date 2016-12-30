@@ -20,6 +20,10 @@ class Post(db.Model):
 
         return True
 
+    def increase_comment_count(self, updated_counts):
+        self.comment_counts = updated_counts
+        db.session.add(self)
+
     @staticmethod
     def generate_fake(count=100):
         from random import seed, randint
@@ -39,6 +43,13 @@ class Post(db.Model):
         u = User.query.offset(10).first()
         p = Post(body='와우',
                  title='이거 레알',
+                 timestamp=forgery_py.date.date(True),
+                 author_id=u.id)
+        db.session.add(p)
+        db.session.commit()
+        print(p.body, p.timestamp, p.author_id)
+        p = Post(body='morbusの複数形のporttitor LoremのIDをネットワーク',
+                 title='morbusの複数形のporttitor LoremのIDをネットワーク',
                  timestamp=forgery_py.date.date(True),
                  author_id=u.id)
         db.session.add(p)

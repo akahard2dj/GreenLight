@@ -63,14 +63,14 @@ def get_user():
             return unauthorized('Invalid credentials')
 
 
-@api.route('/users/login_test', methods=['GET'])
 @auth.login_required
+@api.route('/users/login_test', methods=['GET'])
 def user_login_test():
     return jsonify({'message':'ok'})
 
 
-@api.route('/users/reset_username', methods=['GET', 'POST'])
 @auth.login_required
+@api.route('/users/reset_username', methods=['GET', 'POST'])
 def reset_username():
     data = request.json['data']
 
@@ -93,8 +93,8 @@ def reset_username():
     return response
 
 
-@api.route('/users/reset_password', methods=['GET', 'POST'])
 @auth.login_required
+@api.route('/users/reset_password', methods=['GET', 'POST'])
 def reset_password():
     data = request.json['data']
 

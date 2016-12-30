@@ -1,9 +1,9 @@
-from flask import g, jsonify
+from flask import g, jsonify, request
 from flask_httpauth import HTTPBasicAuth
 from ..models.user import User
 from ..models.anonymoususer import AnonymousUser
 from . import api
-from .errors import unauthorized, forbidden
+from .errors import unauthorized, forbidden, bad_request
 from ..models import token_authentication
 
 auth = HTTPBasicAuth()
@@ -46,7 +46,7 @@ def verify_password(email_or_token, password):
         g.current_user = AnonymousUser()
         return True
 
-#todo http auth ip reject
+# todo http auth ip reject
 
 
 @auth.error_handler
@@ -57,9 +57,28 @@ def auth_error():
 @api.before_request
 @auth.login_required
 def before_request():
-    # todo confirmed is email auth.
     if not g.current_user.is_anonymous and not g.current_user.confirmed:
-        return forbidden('Unconfirmed account')
+        # confirmation code checking
+        try:
+            status = request.json['status']
+        except (TypeError, KeyError):
+            status = 'auth'
+
+        if status == 'confirmation':
+            if g.current_user.confirmation_code == request.json['code']:
+                g.current_user.user_confirmed()
+            else:
+                return forbidden('Incorrect Confirmation Code')
+
+
+@api.route('/confirmation', methods=['GET', 'POST'])
+def confirmation_check():
+    if g.current_user.is_anonymous:
+        return bad_request('anonymous account')
+
+    response = jsonify({'message': 'success'})
+    response.status_code = 200
+    return response
 
 
 @api.route('/token')

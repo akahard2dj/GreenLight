@@ -4,6 +4,8 @@ manager.py db init
 manager.py db migrate
 manager.py db upgrade
 
+manage.py shell -> Role.insert_roles()
+
 hexlify/unhexlify
 
 windows openssl

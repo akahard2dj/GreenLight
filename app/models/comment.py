@@ -2,6 +2,8 @@ from datetime import datetime
 
 from .. import db
 
+from .user import User
+from .post import Post
 
 class Comment(db.Model):
     __tablename__ = 'comments'
@@ -12,3 +14,18 @@ class Comment(db.Model):
     disabled = db.Column(db.Boolean)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+
+    @staticmethod
+    def generate_fake(count=100):
+        from random import seed, randint
+        import forgery_py
+        seed()
+        user_count = User.query.count()
+        for i in range(count):
+            u = User.query.offset(randint(0, user_count - 1)).first()
+            p = Post.query.offset(randint(0, 1000)).first()
+            c = Comment(body=forgery_py.lorem_ipsum.sentences(randint(1, 3)),
+                        post=p,
+                        author=u)
+            db.session.add(c)
+            db.session.commit()

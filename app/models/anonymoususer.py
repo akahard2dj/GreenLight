@@ -3,6 +3,9 @@ from .. import login_manager
 
 
 class AnonymousUser(AnonymousUserMixin):
+    def __init__(self):
+        self.confirmed = False
+
     def can(self, permissions):
         return False
 

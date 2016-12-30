@@ -1,6 +1,8 @@
 from flask import current_app
 from flask_login import UserMixin
 
+import random, string
+
 from .role import Role
 from .permission import Permission
 from .. import db, login_manager
@@ -24,15 +26,20 @@ class User(UserMixin, db.Model):
     role_id = db.Column(db.Integer, db.ForeignKey('roles.id'))
     password_hash = db.Column(db.String(128))
     confirmed = db.Column(db.Boolean, default=False)
+    confirmation_code = db.Column(db.String(10))
     posts = db.relationship('Post', backref='author', lazy='dynamic')
     comments = db.relationship('Comment', backref='author', lazy='dynamic')
 
-    #todo
+    # todo
     # school name
     # member_since
     # last_seen
 
     def __init__(self, **kwargs):
+        self.confirmation_code = ''.join(random.SystemRandom()
+                                         .choice(string.ascii_uppercase + string.digits + string.ascii_lowercase)
+                                         for _ in range(7))
+
         try:
             self.username = kwargs['username']
         except KeyError:
@@ -97,6 +104,12 @@ class User(UserMixin, db.Model):
 
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)
+
+    def user_confirmed(self):
+        self.confirmed = True
+
+        db.session.add(self)
+        return True
 
     @staticmethod
     def generate_fake(count=100):
