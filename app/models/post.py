@@ -1,6 +1,6 @@
 from datetime import datetime
+from app import db
 from app.models.user import User
-from .. import db
 
 
 class Post(db.Model):

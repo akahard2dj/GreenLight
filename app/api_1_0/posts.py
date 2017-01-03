@@ -1,12 +1,12 @@
 from flask import g, jsonify, request, current_app, url_for
 from flask_httpauth import HTTPBasicAuth
 
+from app.api_1_0 import api
+from app.api_1_0.errors import unauthorized, forbidden, not_acceptable, bad_request
+from app.models.post import Post
+from app.models.comment import Comment
+from app import db
 
-from . import api
-from .errors import unauthorized, forbidden, not_acceptable, bad_request
-from ..models.post import Post
-from ..models.comment import Comment
-from .. import db
 
 auth = HTTPBasicAuth()
 

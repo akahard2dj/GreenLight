@@ -1,12 +1,13 @@
 from flask import current_app
 from flask_login import UserMixin
 
-import random, string
+import random
+import string
 
-from .role import Role
-from .permission import Permission
-from .. import db, login_manager
-from . import password_hash as hashing
+from app.models.role import Role
+from app.models.permission import Permission
+from app.models import password_hash as hashing
+from app import db, login_manager
 
 
 @login_manager.user_loader

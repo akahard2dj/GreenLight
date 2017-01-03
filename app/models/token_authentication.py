@@ -1,7 +1,8 @@
 from flask import current_app
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from itsdangerous import BadSignature
-from .user import User
+
+from app.models.user import User
 
 
 def generate_auth_token(user_class, expiration):

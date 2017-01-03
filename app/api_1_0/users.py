@@ -5,11 +5,12 @@ import os
 import random
 import string
 
-from . import api
-from .errors import unauthorized, forbidden, not_acceptable, bad_request
-from .text_cipher import RSACipher
-from ..models.user import User
-from .. import db
+from app.api_1_0 import api
+from app.api_1_0.errors import unauthorized, forbidden, not_acceptable, bad_request
+from app.api_1_0.text_cipher import RSACipher
+from app.models.user import User
+from app import db
+
 
 auth = HTTPBasicAuth()
 rsa_cipher = RSACipher(os.path.join(os.getcwd(), 'greenlight.key'))

@@ -1,10 +1,12 @@
 from flask import g, jsonify, request
 from flask_httpauth import HTTPBasicAuth
-from ..models.user import User
-from ..models.anonymoususer import AnonymousUser
-from . import api
-from .errors import unauthorized, forbidden, bad_request
-from ..models import token_authentication
+
+from app.models import token_authentication
+from app.models.user import User
+from app.models.anonymoususer import AnonymousUser
+from app.api_1_0 import api
+from app.api_1_0.errors import unauthorized, forbidden, bad_request
+
 
 auth = HTTPBasicAuth()
 

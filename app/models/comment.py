@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from .. import db
+from app import db
+from app.models.user import User
+from app.models.post import Post
 
-from .user import User
-from .post import Post
 
 class Comment(db.Model):
     __tablename__ = 'comments'

@@ -1,5 +1,5 @@
 from flask_login import AnonymousUserMixin
-from .. import login_manager
+from app import login_manager
 
 
 class AnonymousUser(AnonymousUserMixin):
