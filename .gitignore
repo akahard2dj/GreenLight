@@ -100,3 +100,5 @@ greenlight.crt
 greenlight.csr
 greenlight.key
 greenlight.key.origin
+
+tmp/

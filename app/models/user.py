@@ -77,11 +77,9 @@ class User(UserMixin, db.Model):
 
     @password.setter
     def password(self, password):
-        #self.password_hash = generate_password_hash(password)
         self.password_hash = hashing.hashing_sha256(password)
 
     def verify_password(self, password):
-        #return check_password_hash(self.password_hash, password)
         return hashing.check_hashing_sha256(self.password_hash, password)
 
     def reset_password(self, new_password):
@@ -123,8 +121,8 @@ class User(UserMixin, db.Model):
         for i in range(count):
             u = User(email=forgery_py.internet.email_address(),
                      username=''.join(random.SystemRandom()
-                                   .choice(string.ascii_uppercase + string.digits + string.ascii_lowercase)
-                                   for _ in range(7)),
+                                      .choice(string.ascii_uppercase + string.digits + string.ascii_lowercase)
+                                      for _ in range(7)),
                      password=forgery_py.lorem_ipsum.word(),
                      confirmed=True)
             db.session.add(u)
@@ -132,4 +130,3 @@ class User(UserMixin, db.Model):
                 db.session.commit()
             except IntegrityError:
                 db.session.rollback()
-

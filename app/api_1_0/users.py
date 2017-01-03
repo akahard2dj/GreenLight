@@ -1,5 +1,5 @@
 from flask import g, jsonify, request
-from flask_httpauth import HTTPBasicAuth
+
 import cryptography.exceptions
 import os
 import random
@@ -8,11 +8,10 @@ import string
 from app.api_1_0 import api
 from app.api_1_0.errors import unauthorized, forbidden, not_acceptable, bad_request
 from app.api_1_0.text_cipher import RSACipher
+from app.api_1_0.authentication import auth
 from app.models.user import User
 from app import db
 
-
-auth = HTTPBasicAuth()
 rsa_cipher = RSACipher(os.path.join(os.getcwd(), 'greenlight.key'))
 
 
@@ -64,14 +63,14 @@ def get_user():
             return unauthorized('Invalid credentials')
 
 
-@auth.login_required
 @api.route('/users/login_test', methods=['GET'])
+@auth.login_required
 def user_login_test():
     return jsonify({'message':'ok'})
 
 
-@auth.login_required
 @api.route('/users/reset_username', methods=['GET', 'POST'])
+@auth.login_required
 def reset_username():
     data = request.json['data']
 
@@ -94,8 +93,8 @@ def reset_username():
     return response
 
 
-@auth.login_required
 @api.route('/users/reset_password', methods=['GET', 'POST'])
+@auth.login_required
 def reset_password():
     data = request.json['data']
 

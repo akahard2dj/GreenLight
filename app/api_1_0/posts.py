@@ -1,18 +1,14 @@
 from flask import g, jsonify, request, current_app, url_for
-from flask_httpauth import HTTPBasicAuth
 
 from app.api_1_0 import api
+from app.api_1_0.authentication import auth
 from app.api_1_0.errors import unauthorized, forbidden, not_acceptable, bad_request
 from app.models.post import Post
 from app.models.comment import Comment
-from app import db
 
 
-auth = HTTPBasicAuth()
-
-
-@auth.login_required
 @api.route('/posts/view/<int:post_id>', methods=['GET'])
+@auth.login_required
 def get_post(post_id):
     print('called')
     post = Post.query.get_or_404(post_id)
@@ -24,26 +20,29 @@ def get_post(post_id):
 
 
 # todo comment loading jsonify needs to be implemented
-@auth.login_required
 @api.route('/posts/view/<int:post_id>/comments/', methods=['GET'])
+@auth.login_required
 def get_post_comments(post_id):
     post = Post.query.get_or_404(post_id)
     comments = post.comments.order_by(Comment.timestamp.asc())
-    for comment in comments:
-        print(comment.post_id, comment.body, comment.timestamp)
+    if not comments.first():
+        print('empty')
+    else:
+        for comment in comments:
+            print('#', comment.post_id, comment.body, comment.timestamp)
 
     return jsonify({'message': 'ok'})
 
 
 # todo comment posting
-@auth.login_required
 @api.route('/posts/view/<int:post_id>/comments/', methods=['POST'])
+@auth.login_required
 def set_post_comments(post_id):
     pass
 
 
-@auth.login_required
 @api.route('/posts/pagination', methods=['GET'])
+@auth.login_required
 def post_pagination():
     per_page = current_app.config['FLASKY_POSTS_PER_PAGE']
     page = request.args.get('page', 1, type=int)
@@ -54,7 +53,9 @@ def post_pagination():
     else:
         query_id = request.args.get('query_id', type=int)
 
-    posts = Post.query.order_by(Post.id.desc()).filter(Post.id <= query_id).limit(per_page).offset(page*per_page)
+    posts = Post.query.order_by(Post.id.desc()).filter(Post.id <= query_id).limit(per_page).offset((page-1)*per_page)
+    for post in posts:
+        print(post.title, post.read_counts)
 
     next_item = dict()
     next_item['query_id'] = query_id
@@ -69,8 +70,8 @@ def post_pagination():
     return jsonify({'message': 'ok', 'next_item': next_item})
 
 
-@auth.login_required
 @api.route('/posts/')
+@auth.login_required
 def get_posts():
     page = request.args.get('page', 1, type=int)
     pagination = Post.query.order_by(Post.id.desc()).paginate(
